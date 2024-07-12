@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced 3D Website with Animations</title>
+    <style>
+        body { margin: 0; overflow: hidden; }
+        canvas { display: block; }
+        #info {
+            position: absolute;
+            top: 10px;
+            width: 100%;
+            text-align: center;
+            color: white;
+            font-family: Arial, sans-serif;
+            font-size: 18px;
+            pointer-events: none;
+        }
+        #menu {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+        }
+        .menu-item {
+            display: inline-block;
+            margin: 0 10px;
+            padding: 10px 20px;
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .menu-item:hover {
+            background-color: rgba(255, 255, 255, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div id="info">Welcome to My Enhanced 3D Website</div>
+    <div id="menu">
+        <div class="menu-item" id="changeColor">Change Color</div>
+        <div class="menu-item" id="addSphere">Add Sphere</div>
+        <div class="menu-item" id="toggleRotation">Toggle Rotation</div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.7.1/gsap.min.js"></script>
+    <script>
+        // Three.js setup
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Create a cube
+        const geometry = new THREE.BoxGeometry();
+        const material = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
+        const cube = new THREE.Mesh(geometry, material);
+        scene.add(cube);
+
+        // Add lighting
+        const light = new THREE.PointLight(0xffffff, 1, 100);
+        light.position.set(0, 0, 10);
+        scene.add(light);
+
+        camera.position.z = 5;
+
+        // Animation variables
+        let rotationEnabled = true;
+
+        // Animation function
+        function animate() {
+            requestAnimationFrame(animate);
+            if (rotationEnabled) {
+                cube.rotation.x += 0.01;
+                cube.rotation.y += 0.01;
+            }
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Resize handler
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // GSAP Animations
+        gsap.from(cube.scale, {duration: 2, x: 0, y: 0, z: 0, ease: "elastic.out(1, 0.3)"});
+        gsap.to(cube.position, {duration: 2, y: 0.5, repeat: -1, yoyo: true, ease: "sine.inOut"});
+
+        const infoElement = document.getElementById('info');
+        gsap.from(infoElement, {duration: 1, opacity: 0, y: -50, ease: "power2.out"});
+
+        // Menu animations
+        const menuItems = document.querySelectorAll('.menu-item');
+        gsap.from(menuItems, {duration: 1, opacity: 0, y: 50, stagger: 0.2, ease: "power2.out"});
+
+        // Interactive elements
+        document.getElementById('changeColor').addEventListener('click', () => {
+            const newColor = Math.random() * 0xffffff;
+            gsap.to(cube.material.color, {
+                r: (newColor >> 16) / 255,
+                g: ((newColor >> 8) & 255) / 255,
+                b: (newColor & 255) / 255,
+                duration: 1
+            });
+        });
+
+        document.getElementById('addSphere').addEventListener('click', () => {
+            const sphereGeometry = new THREE.SphereGeometry(0.5, 32, 32);
+            const sphereMaterial = new THREE.MeshPhongMaterial({ color: Math.random() * 0xffffff });
+            const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+            sphere.position.set(
+                Math.random() * 4 - 2,
+                Math.random() * 4 - 2,
+                Math.random() * 4 - 2
+            );
+            scene.add(sphere);
+            gsap.from(sphere.scale, {duration: 1, x: 0, y: 0, z: 0, ease: "elastic.out(1, 0.3)"});
+        });
+
+        document.getElementById('toggleRotation').addEventListener('click', () => {
+            rotationEnabled = !rotationEnabled;
+        });
+
+        // Camera animation
+        gsap.to(camera.position, {
+            duration: 10,
+            x: 3,
+            y: 2,
+            z: 7,
+            repeat: -1,
+            yoyo: true,
+            ease: "power1.inOut"
+        });
+    </script>
+</body>
+</html>
